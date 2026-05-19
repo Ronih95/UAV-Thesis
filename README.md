@@ -89,8 +89,7 @@ Example: `Bebop2_16g_1kdps_normalized_1022.csv`
 ```
 Hakan_Hoca_Proje/
 ├── Untitled-1.ipynb                  ← Main analysis file (Jupyter Notebook)
-├── README.md                         ← Turkish README
-├── README_EN.md                      ← This file
+├── README.md                      ← This file
 ├── UAV_measurement_data/
 │   ├── README.md                     ← Dataset documentation
 │   ├── Parrot_Bebop_2/
