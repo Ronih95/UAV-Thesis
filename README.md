@@ -233,9 +233,7 @@ filtered = filtfilt(b, a, signal)
 ```
 
 **Why Butterworth?**
-- 4th-order filter → sufficient sharpness, computationally efficient
-- Band: **5–200 Hz** → DC drift (0–5 Hz) and high-frequency electronic noise (>200 Hz) are removed; mechanical vibrations representing propeller faults are preserved
-- `filtfilt` → **zero-phase filtering** (the signal does not shift forward or backward in time)
+A 4-th-order filter gives a clean cutoff without being too slow to compute. The band is set to 5–200 Hz to cut out low-frequency drift and high-frequency electronic noise, while keeping the mechanical vibrations that actually indicate faults. `filtfilt` filters the signal twice (forward and backward) which means it dosent shift the signal in time.
 
 ### §2.2 — Windowed Feature Extraction
 
@@ -260,10 +258,7 @@ Each file is divided into non-overlapping 500-sample windows:
 | `zcr` | Zero-crossing rate — indicator of frequency content |
 
 **Why these features?**
-Together, these 10 statistics cover the amplitude, energy, frequency, and shape characteristics of the signal. Using these features instead of the raw signal:
-1. Dramatically reduces dimensionality (86,016 → 10 numbers per channel)
-2. Focuses models on periodic statistics rather than temporal patterns
-3. Produces a lightweight structure suitable for real-time applications
+Together, these 10 statistics describe the signal's amplitude, energy, frequency content and shape. Using them instead of raw signal data cuts the size dramatically (86,016 samples → 10 numbers per channel), which makes the model focus on the right patterns and keeps things fast enough to run in real time.
 
 ### §2.3 — Feature–Fault Correlation
 
@@ -271,7 +266,7 @@ Together, these 10 statistics cover the amplitude, energy, frequency, and shape 
 
 **Spearman rank correlation** between each feature and the fault label is computed; the 20 features with the highest absolute correlation are visualized.
 
-**Why Spearman?** Pearson correlation measures linear relationships. The fault–feature relationship may be monotonic but non-linear; Spearman captures such relationships as well.
+**Why Spearman?** Pearson only catches linear relationships. The connection between features and faults can be non-linear and Spearman handles that.
 
 ### §2.4 — Power Spectral Density (PSD)
 
@@ -283,7 +278,7 @@ freqs, psd = welch(signal, fs=500, nperseg=1024)
 
 Frequency content between 0–250 Hz is examined using Welch's method. PSDs for healthy, chipped, and bent conditions are compared.
 
-**Why Welch?** Welch's method divides the signal into overlapping segments, computes the periodogram of each, and averages them. This provides a **more noise-robust** frequency estimate compared to plain FFT.
+**Why Welch?** Plain FFT on a noisy signal gives a messy frequency estimate. Welch's method splits the signal into overlapping chunks, computes each one separately and then averages the results, which gives a much cleaner output.
 
 ---
 
@@ -384,7 +379,7 @@ z = (value - rolling_mean) / rolling_std
 # Window: 200 samples | Threshold: |z| > 3
 ```
 
-**Why rolling Z-score?** Using a global mean and standard deviation could misclassify changing conditions throughout a flight (acceleration, deceleration) as anomalies. A local rolling Z-score solves this problem.
+**Why rolling Z-score?** A global mean would flag normal variation during takeoff and landing as anomalies. By computing mean and standard deviation over a moving window, the threshold adapts to whatever the signal is doing right now.
 
 **Threshold |z| > 3:** Under the Gaussian distribution assumption, 99.7% of values fall within this bound. Values exceeding it are very likely genuine anomaly signals.
 
